@@ -1,9 +1,9 @@
 import express from 'express';
-import { getData } from '../Controller/StatisticsCard.Controller';
+import { getStatisticsData } from '../Controller/StatisticsCard.Controller';
 
 
-const router = express.Router();
+const StatisticsCardRouter = express.Router();
 
-router.post('/', getData)
+StatisticsCardRouter.post('/', getStatisticsData)
 
-export default router;
+export default StatisticsCardRouter;
