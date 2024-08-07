@@ -9,7 +9,10 @@ const getDeviceID = async (Label: string, Token: string, CustomerID : string): P
     headers: { 'X-Authorization': `Bearer ${Token}` }
   })
   const ID = jp.query(response.data, '$.data[*].id.id');
+<<<<<<< HEAD
+=======
   console.log(ID, ID[0])
+>>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
   return ID[0];
 };
 
