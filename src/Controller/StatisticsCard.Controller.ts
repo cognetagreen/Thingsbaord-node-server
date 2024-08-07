@@ -12,7 +12,7 @@ const getDeviceID = async (Label: string, Token: string): Promise<string> => {
   return ID[0];
 };
 
-const getData = async (req: Request, res: Response): Promise<void> => {
+const getStatisticsData = async (req: Request, res: Response): Promise<void> => {
   try {
     const { deviceLabel, telemetry, token } = req.body;
     const deviceID = await getDeviceID(deviceLabel, token);
@@ -21,7 +21,7 @@ const getData = async (req: Request, res: Response): Promise<void> => {
       const currentTime = new Date().getTime();
       const prevDay = currentTime - (1000 * 60 * 60 * 24);
 
-      const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${telemetry}&startTs=${prevDay}&endTs=${currentTime}&interval=0&limit=1440&agg=NONE&orderBy=ASC&useStrictDataTypes=false`, {
+      const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${telemetry}&startTs=${prevDay}&endTs=${currentTime}&interval=0&limit=3000&agg=NONE&orderBy=ASC&useStrictDataTypes=false`, {
         headers: { 'X-Authorization': `Bearer ${token}` }
       });
 
@@ -46,8 +46,13 @@ const getData = async (req: Request, res: Response): Promise<void> => {
           stat = (latestValue - compareValue)*100 / latestValue;
         }
 
+<<<<<<< HEAD
       // console.log(latestValue, compareValue, stat)
         res.status(200).json( [(latestValue).toFixed(2), (stat).toFixed(2), (sparkValues.map(Number)).slice(-60)] );
+=======
+      console.log(latestValue, compareValue, stat)
+        res.status(200).json( [(latestValue).toFixed(2), (stat).toFixed(2), (sparkValues.map(Number))] );
+>>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
       } else {
         res.status(404).json({ error: "No telemetry data found" });
       }
@@ -61,4 +66,4 @@ const getData = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getData };
+export { getStatisticsData };

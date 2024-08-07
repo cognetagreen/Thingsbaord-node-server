@@ -5,8 +5,11 @@ import bodyParser from 'body-parser';
 import StatisticsCardRouter from './Routes/Statistics.CardRoute';
 import LatestValueCardRouter from './Routes/LatestValueCard.Route';
 import GetCustomersRoutes from './Routes/GetCustomers.Route';
+<<<<<<< HEAD
 import GetSpecificYieldRouter from './Routes/GetSpecificYield.Route';
 import GetColumnLineRouter from './Routes/GetColumnLine.Route';
+=======
+>>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
 const cors = require('cors');
 
 const app = express();
@@ -30,6 +33,7 @@ app.use(cors());
 // });
 
 // Routes
+<<<<<<< HEAD
 
 // Customer Routes
 app.use("/api/v1/getCustomers", GetCustomersRoutes);
@@ -40,6 +44,11 @@ app.use("/api/v1/getLatestValueCardData", LatestValueCardRouter);
 // Widget Chart Routes
 app.use("/api/v1/getSpecificYield", GetSpecificYieldRouter);
 app.use("/api/v1/getColumnLine", GetColumnLineRouter);
+=======
+app.use("/api/v1/getCustomers", GetCustomersRoutes);
+app.use("/api/v1/getStatisticsData", StatisticsCardRouter);
+app.use("/api/v1/getLatestValueCardData", LatestValueCardRouter);
+>>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
 
 // Start the server
 app.listen(port, () => {
