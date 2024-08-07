@@ -26,7 +26,7 @@ const getData = async (req: Request, res: Response): Promise<void> => {
       });
 
       const telemetryData = response.data[telemetry];
-      console.log(response.data)
+      // console.log(response.data)
       let sparkValues = jp.query(telemetryData, '$..value');
       if (telemetryData && telemetryData.length > 0) {
         let latestValue, compareValue;
@@ -46,7 +46,7 @@ const getData = async (req: Request, res: Response): Promise<void> => {
           stat = (latestValue - compareValue)*100 / latestValue;
         }
 
-      console.log(latestValue, compareValue, stat)
+      // console.log(latestValue, compareValue, stat)
         res.status(200).json( [(latestValue).toFixed(2), (stat).toFixed(2), (sparkValues.map(Number)).slice(-60)] );
       } else {
         res.status(404).json({ error: "No telemetry data found" });
