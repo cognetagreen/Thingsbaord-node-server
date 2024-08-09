@@ -4,13 +4,9 @@ const jp = require('jsonpath');
 
 const BASE_URL = "https://cogneta.cloud/api";
 
-<<<<<<< HEAD
 // For Multiple Customers e.g. Deif India
 
 const getCustomersDetails = async (textSearch: string, Token: string): Promise<any> => {
-=======
-const getDeviceID = async (textSearch: string, Token: string): Promise<any> => {
->>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
   const response = await axios.get(`${BASE_URL}/user/customers?pageSize=10&page=0&sortProperty=createdTime&textSearch=${textSearch}`, {
     headers: { 'X-Authorization': `Bearer ${Token}` }
   });
@@ -20,11 +16,7 @@ const getDeviceID = async (textSearch: string, Token: string): Promise<any> => {
 const GetCustomersController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { textSearch, token } = req.body;
-<<<<<<< HEAD
     const customerDetails = await getCustomersDetails(textSearch, token);
-=======
-    const customerDetails = await getDeviceID(textSearch, token);
->>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
     
     // Check if customer data is arrived
     if (customerDetails?.data && customerDetails.data.length > 0) {
@@ -33,13 +25,7 @@ const GetCustomersController = async (req: Request, res: Response): Promise<void
       const details = name.map((value: any, index: any) => ({
         value: customerID[index],
         label: name[index], 
-      }));
-<<<<<<< HEAD
-=======
-
-      console.log("details: ", details);
->>>>>>> f8603801177abfe120430e731a7cb26e6e11e957
-      
+      }));    
       res.status(200).json(details);
     } else {
       res.status(404).json({ error: "No customer data found" });
@@ -47,7 +33,7 @@ const GetCustomersController = async (req: Request, res: Response): Promise<void
     
   } catch (error) {
     console.error("Error fetching customer detail", error);
-<<<<<<< HEAD
+
     res.status(500).json({ error: "Failed to fetch customers detail" });
   }
 };
@@ -93,10 +79,3 @@ const getCustomerDetails = async (CustomerID: string, Token: string): Promise<an
 
 
 export { GetCustomersController, GetCustomerController };
-=======
-    res.status(500).json({ error: "Failed to fetch customer detail" });
-  }
-};
-
-export { GetCustomersController };
->>>>>>> f8603801177abfe120430e731a7cb26e6e11e957

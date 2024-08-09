@@ -7,6 +7,8 @@ import LatestValueCardRouter from './Routes/LatestValueCard.Route';
 import GetCustomersRoutes from './Routes/GetCustomers.Route';
 import GetSpecificYieldRouter from './Routes/GetSpecificYield.Route';
 import GetColumnLineRouter from './Routes/GetColumnLine.Route';
+import GetEnergyYieldRouter from './Routes/GetEnergyYield.Routes';
+import GetAssetSummaryRouter from './Routes/GetAssetSummary.Route';
 const cors = require('cors');
 
 const app = express();
@@ -43,6 +45,8 @@ app.use("/api/v1/getColumnLine", GetColumnLineRouter);
 app.use("/api/v1/getCustomers", GetCustomersRoutes);
 app.use("/api/v1/getStatisticsData", StatisticsCardRouter);
 app.use("/api/v1/getLatestValueCardData", LatestValueCardRouter);
+app.use("/api/v1/getEnergyYieldData", GetEnergyYieldRouter);
+app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
 
 
 // Start the server
