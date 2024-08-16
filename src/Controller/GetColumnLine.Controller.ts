@@ -41,7 +41,7 @@ const GetColumnLineController = async (req: Request, res: Response): Promise<voi
     for(var i = 0; i < Object.entries(type).length; i++) {
         if(i == 0) { // This is for Column!  ((2 Column))
             const keys = Object.values(type)[i];
-            let columnsData = [];
+            let columnsData = []; //[[1,2,3,4,5,6,7], [1,2,3,4,5,6,7]]
             let columnTs = [];
             for(var j = 0; j < deviceDetails.length; j++) {
                 const id = deviceDetails[j].id;
@@ -49,7 +49,7 @@ const GetColumnLineController = async (req: Request, res: Response): Promise<voi
                   const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${24*60*60*1000}&limit=100&agg=SUM`, {
                     headers: { 'X-Authorization': `Bearer ${token}` }
                   });
-                  const value = jp.query(response.data, '$..value');
+                  const value = jp.query(response.data, '$..value'); // [1,2,3,4,5,6,7]
                   const ts = jp.query(response.data, '$..ts');
                   // console.log(response.data)
                   // console.log(value)
@@ -71,7 +71,7 @@ const GetColumnLineController = async (req: Request, res: Response): Promise<voi
               sum.push((parseFloat(columnsData[0][k]) + parseFloat(columnsData[1][k+7])).toFixed(2));
               series.push(data);
             }
-        } else if(i==1) {
+        } else if(i==1) { // This is For Line
             const keys = Object.values(type)[i];
             let lineData = [];
             let lineTs = [];

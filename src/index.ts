@@ -9,6 +9,7 @@ import GetSpecificYieldRouter from './Routes/GetSpecificYield.Route';
 import GetColumnLineRouter from './Routes/GetColumnLine.Route';
 import GetEnergyYieldRouter from './Routes/GetEnergyYield.Routes';
 import GetAssetSummaryRouter from './Routes/GetAssetSummary.Route';
+import GetGeneratorTableRouter from './Routes/GetGeneratorTable.Route';
 const cors = require('cors');
 
 const app = express();
@@ -47,6 +48,10 @@ app.use("/api/v1/getStatisticsData", StatisticsCardRouter);
 app.use("/api/v1/getLatestValueCardData", LatestValueCardRouter);
 app.use("/api/v1/getEnergyYieldData", GetEnergyYieldRouter);
 app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
+
+// Widget Table Routes
+app.use("/api/v1/getGeneratorTableData", GetGeneratorTableRouter);
+
 
 
 // Start the server

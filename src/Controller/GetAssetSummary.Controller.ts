@@ -34,12 +34,12 @@ const GetAssetSummaryController = async (req: Request, res: Response): Promise<v
 
     for (const [device, key] of Object.entries(searchObj)) {
       const deviceDetails = await getDeviceDetails(`${device}-`, token);
-      console.log(deviceDetails);
+      // console.log(deviceDetails);
       
       const telemetryPromises = deviceDetails.map(async (deviceInfo) => {
         const id = deviceInfo.id;
         const stringKey = key as string;
-        const newKey = stringKey.replace("0", (deviceInfo.name).split("-")[1]);
+        const newKey = stringKey.replace("0", (deviceInfo.name).split("-")[1]);   //DG-1 => ["DG", 1]
 
         try {
           const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${newKey}`, {
