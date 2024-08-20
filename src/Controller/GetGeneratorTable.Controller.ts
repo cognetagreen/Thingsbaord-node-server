@@ -38,7 +38,7 @@ const GetGeneratorTableController = async (req: Request, res: Response): Promise
   try {
     const { searchTag, token, timeWindow } = req.body;
     const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
-    console.log(timeWindow);
+    // console.log(timeWindow);
     let series = [];
     let column = ["Date & Time"] as string[];
     let nonFormatDataFromAPI = [] as string[][];
