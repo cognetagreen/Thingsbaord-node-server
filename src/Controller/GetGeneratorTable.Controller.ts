@@ -14,6 +14,7 @@ interface TimeWindowType {
   startTs: number;
   endTs: number;
   aggregate: string;
+  interval : number;
 }
 
 const getDeviceDetails = async (device: string, Token: string): Promise<DeviceDetailsType[]> => {
@@ -36,7 +37,7 @@ const getDeviceDetails = async (device: string, Token: string): Promise<DeviceDe
 const GetGeneratorTableController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { searchTag, token, timeWindow } = req.body;
-    const { startTs, endTs, aggregate } = timeWindow as TimeWindowType;
+    const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
     console.log(timeWindow);
     let series = [];
     let column = ["Date & Time"] as string[];
@@ -45,7 +46,7 @@ const GetGeneratorTableController = async (req: Request, res: Response): Promise
     // Iterate over each device in the searchTag
     for (const [device, key] of Object.entries(searchTag)) {
       const deviceDetails = await getDeviceDetails(`${device}-`, token);
-      console.log(deviceDetails);
+      // console.log(deviceDetails);
 
       // Sequentially fetch telemetry data for each device
       for (const [i, deviceInfo] of deviceDetails.entries()) {
@@ -54,24 +55,24 @@ const GetGeneratorTableController = async (req: Request, res: Response): Promise
         const newKey = stringKey.replace("0", (deviceInfo.name).split("-")[1]); // DG-2 => ["DG", 2]
 
         try {
-          const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${newKey}&startTs=${startTs}&endTs=${endTs}&interval=0&limit=5000&agg=${aggregate}&orderBy=ASC&useStrictDataTypes=false`, {
+          const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${newKey}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${interval}&limit=5000&agg=${aggregate}&orderBy=ASC&useStrictDataTypes=false`, {
             headers: { 'X-Authorization': `Bearer ${token}` }
           });
 
-          const value = jp.query(response.data, '$..value');
+          const value = jp.query(response.data, '$..value') as [];
 
-          console.log(response.data);
-          console.log(value);
+          // console.log(response.data);
+          // console.log(value);
 
           // Add the key to the column list
           column.push(newKey);
 
           if (i === 0) {
             const ts = jp.query(response.data, '$..ts') as [];
-            console.log("ts", [ts]);
+            // console.log("ts", [ts]);
             nonFormatDataFromAPI.push(ts.map(elem => new Date(elem).toLocaleString()));
           }
-          nonFormatDataFromAPI.push(value);
+          nonFormatDataFromAPI.push(value.map(elem => Number(elem).toFixed(2)));
         } catch (error) {
           console.error(`Error fetching telemetry data for device ${id}:`, error);
           continue; // Skip to the next device if there's an error
@@ -91,10 +92,10 @@ const GetGeneratorTableController = async (req: Request, res: Response): Promise
       }
     }
 
-    console.log(nonFormatDataFromAPI);
+    // console.log(nonFormatDataFromAPI);
     series.push({ column: column, dataFromAPI: dataFromAPI });
 
-    console.log("series", series);
+    // console.log("series", series);
 
     const filteredSeries = series.filter((s) => s !== null);
 
