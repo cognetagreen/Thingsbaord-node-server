@@ -15,20 +15,20 @@ const getDeviceID = async (Label: string, Token: string, CustomerID : string): P
 const GetBatteryStatusController = async (req: Request, res: Response): Promise<void> => {
     try {
       const { search, token, customerID } = req.body;
-      console.log(search, token, customerID)
+    //   console.log(search, token, customerID)
       const deviceID = await getDeviceID(search.devName, token, customerID);
-      console.log("deviceID : ", deviceID)
+    //   console.log("deviceID : ", deviceID)
       try {
         const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${search.keys}`, {
           headers: { 'X-Authorization': `Bearer ${token}` }
         });
         
         const telemetryData = response.data;
-            console.log(telemetryData);
+            // console.log(telemetryData);
         // Check if telemetryData is defined and has at least one element
         if (telemetryData) {
             const values = jp.query(telemetryData, "$..value") as [];
-            console.log(values)
+            // console.log(values)
           const latestValue = values.map(elem => parseFloat(elem).toFixed(2));
           res.status(200).json(latestValue);
         } else {
