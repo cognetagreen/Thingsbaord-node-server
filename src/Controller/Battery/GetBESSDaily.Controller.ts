@@ -47,7 +47,7 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
             let series = [];
             for(var i = 0; i < key.length; i++) {
                 const values = telemetryData[key[i]] as TimeSeries[];
-                console.log(values)
+                // console.log(values)
                 seriesData.push(values.map(elem => [elem.ts , parseFloat(parseFloat(elem.value).toFixed(2))]))
                 series.push({
                     type : searchTag.type,
