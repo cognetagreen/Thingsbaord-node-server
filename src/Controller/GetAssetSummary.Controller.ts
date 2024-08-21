@@ -64,7 +64,12 @@ const GetAssetSummaryController = async (req: Request, res: Response): Promise<v
       series.push({
         name: `Available % ${device}`,
         y: (nonZeroCount / deviceDetails.length)  // Total Asset In Plant
-      });
+      },
+      {
+        name : `Unavailable % ${device}`,
+        y : ((deviceDetails.length - nonZeroCount) / deviceDetails.length)
+      }
+    );
     }
 
     // console.log("series", series);
