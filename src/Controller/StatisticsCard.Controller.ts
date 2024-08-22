@@ -19,35 +19,41 @@ const getStatisticsData = async (req: Request, res: Response): Promise<void> => 
 
     try {
       const currentTime = new Date().getTime();
-      const prevDay = currentTime - (1000 * 60 * 60 * 24);
+      const prevDay = currentTime - 1000 * 60 * 60 * 24;
 
-      const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${telemetry}&startTs=${prevDay}&endTs=${currentTime}&interval=0&limit=3000&agg=NONE&orderBy=ASC&useStrictDataTypes=false`, {
-        headers: { 'X-Authorization': `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${telemetry}&startTs=${prevDay}&endTs=${currentTime}&interval=0&limit=3000&agg=NONE&orderBy=ASC&useStrictDataTypes=false`,
+        {
+          headers: { 'X-Authorization': `Bearer ${token}` },
+        }
+      );
 
       const telemetryData = response.data[telemetry];
-      // console.log(response.data)
-      let sparkValues = jp.query(telemetryData, '$..value');
-      if (telemetryData && telemetryData.length > 0) {
-        let latestValue, compareValue;
-        if(req.body.title === "Total Revenue") {
+      // console.log("Telemetry Data:", telemetryData); // Check the data structure
 
-            latestValue = Number(telemetryData[telemetryData.length - 1].value) * 3;
-            compareValue = telemetryData[0].value * 3;
-        }else {
-            latestValue = Number(telemetryData[telemetryData.length - 1].value);
-            compareValue = telemetryData[0].value;
+      if (telemetryData && Array.isArray(telemetryData) && telemetryData.length > 0) {
+        let sparkValues = jp.query(telemetryData, '$..value');
+
+        let latestValue: number, compareValue: number;
+        if (req.body.title === "Total Revenue") {
+          latestValue = Number(telemetryData[telemetryData.length - 1].value) * 3;
+          compareValue = Number(telemetryData[0].value) * 3;
+        } else {
+          latestValue = Number(telemetryData[telemetryData.length - 1].value);
+          compareValue = Number(telemetryData[0].value);
         }
+
         let stat = 0;
-        if (latestValue <= 0) {
-          stat = 0;
-        }else {
-
-          stat = (latestValue - compareValue)*100 / latestValue;
+        if (latestValue > 0) {
+          stat = ((latestValue - compareValue) * 100) / latestValue;
         }
 
-      // console.log(latestValue, compareValue, stat)
-        res.status(200).json( [(latestValue).toFixed(2), (stat).toFixed(2), (sparkValues.map(Number)).slice(-60)] );
+        console.log(latestValue, compareValue, stat);
+        res.status(200).json([
+          latestValue.toFixed(2),
+          stat.toFixed(2),
+          sparkValues.map(Number).slice(-60),
+        ]);
       } else {
         res.status(404).json({ error: "No telemetry data found" });
       }
@@ -60,5 +66,6 @@ const getStatisticsData = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ error: "Failed to fetch device ID" });
   }
 };
+
 
 export { getStatisticsData };

@@ -28,6 +28,7 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
     try {
       const { searchTag, timeWindow, token, customerID } = req.body;
       const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
+      console.log(searchTag.type[0]);
         // console.log(timeWindow)
     //   console.log(searchTag, searchTag.name[0])
       const deviceID = await getDeviceID(searchTag.devName, token, customerID);
@@ -50,7 +51,7 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
                 // console.log(values)
                 seriesData.push(values.map(elem => [elem.ts , parseFloat(parseFloat(elem.value).toFixed(2))]))
                 series.push({
-                    type : searchTag.type,
+                    type : searchTag.type[i],
                     name : searchTag.name[i],
                     data : seriesData[i],
                     marker: {
