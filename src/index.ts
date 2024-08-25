@@ -13,6 +13,9 @@ import GetGeneratorTableRouter from './Routes/GetGeneratorTable.Route';
 import GetBatteryStatusRouter from './Routes/Battery/GetBatteryStatus.Route';
 import GetBESSDailyRouter from './Routes/Battery/GetBESSDaily.Route';
 import GetSomeTitleRouter from './Routes/Battery/GetSomeTitle.Route';
+import GetCellVDeltaDataRouter from './Routes/Battery/GetCellVDeltaData.Route';
+import GetPlantCardRouter from './Routes/PlantVeiw/GetPlantCard.Route';
+import GetPlantViewTableRouter from './Routes/PlantVeiw/GetPlantViewTable.Route';
 const cors = require('cors');
 
 const app = express();
@@ -55,6 +58,12 @@ app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);
 app.use("/api/v1/getBESSDailyData", GetBESSDailyRouter);
 app.use("/api/v1/getSomeTitleData", GetSomeTitleRouter);
+app.use("/api/v1/getCellVDeltaData", GetCellVDeltaDataRouter);
+
+// Plant View
+app.use("/api/v1/getPlantCardData", GetPlantCardRouter);
+app.use("/api/v1/getPlantViewTableData", GetPlantViewTableRouter);
+
 
 // Widget Table Routes
 app.use("/api/v1/getGeneratorTableData", GetGeneratorTableRouter);

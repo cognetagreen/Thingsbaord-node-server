@@ -12,29 +12,25 @@ const getDeviceID = async (Label: string, Token: string, CustomerID : string): P
   return ID[0];
 };
 
-interface TimeWindowType {
-    startTs: number;
-    endTs: number;
-    aggregate: string;
-    interval : number;
-  }
 
 interface TimeSeries {
     ts : number;
     value : string;
 }
 
-const GetBESSDailyController = async (req: Request, res: Response): Promise<void> => {
+const GetCellVDeltaController = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { searchTag, timeWindow, token, customerID } = req.body;
-      const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
+      const { searchTag, token, customerID } = req.body;
       // console.log(searchTag.type[0]); 
         // console.log(timeWindow)
     //   console.log(searchTag, searchTag.name[0])
       const deviceID = await getDeviceID(searchTag.devName, token, customerID);
+      const now = new Date();
+      const startTs = new Date(now.getTime() - 24 * 60 * 60 * 1000).setHours(0,0,0,0)
+      const endTs = startTs + 24     * 60 * 60 * 1000 - 1;
     //   console.log("deviceID : ", deviceID)
       try {
-        const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${searchTag.keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${interval}&limit=5000&agg=${aggregate}&orderBy=ASC&useStrictDataTypes=false`, {
+        const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${searchTag.keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${1000*60*5}&limit=5000&agg=NONE&orderBy=ASC&useStrictDataTypes=false`, {
           headers: { 'X-Authorization': `Bearer ${token}` }
         });
         const telemetryData = response.data;
@@ -42,23 +38,24 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
         // Check if telemetryData is defined and has at least one element
         if (telemetryData) {
 
-            const keys = searchTag.keys as string;
-            const key = keys.split(",");
-            let seriesData = [];
+            const key = searchTag.keys as string;
+            // const key = keys.split(",");
             let series = [];
-            for(var i = 0; i < key.length; i++) {
-                const values = telemetryData[key[i]] as TimeSeries[];
+            // for(var i = 0; i < key.length; i++) {
+                const values = telemetryData[key] as TimeSeries[];
                 // console.log(values)
-                seriesData.push(values.map(elem => [elem.ts , parseFloat(parseFloat(elem.value).toFixed(2))]))
+                let seriesData = values.map(elem => parseFloat(((220-parseFloat(elem.value))/220).toFixed(2)));
+                const countArray = seriesData.reduce<{[key: number]: number}>((acc, curr) => {
+                    acc[curr] = (acc[curr] || 0) + 1;
+                    return acc;
+                  }, {});
+                
                 series.push({
-                    type : searchTag.type[i],
-                    name : searchTag.name[i],
-                    data : seriesData[i],
-                    marker: {
-                        enabled: false // Disable the dots on the line
-                    }
+                    type : searchTag.type[0],
+                    name : searchTag.name[0],
+                    data : Object.values(countArray),//[11,22,33,44,55,66,77,88,99]
                 });
-            }
+            // }
 
             // console.log(series) 
         //   const latestValue = seriesData;
@@ -77,4 +74,4 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
   };
   
 
-export { GetBESSDailyController };
+export { GetCellVDeltaController };
