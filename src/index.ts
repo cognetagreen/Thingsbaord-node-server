@@ -16,6 +16,7 @@ import GetSomeTitleRouter from './Routes/Battery/GetSomeTitle.Route';
 import GetCellVDeltaDataRouter from './Routes/Battery/GetCellVDeltaData.Route';
 import GetPlantCardRouter from './Routes/PlantVeiw/GetPlantCard.Route';
 import GetPlantViewTableRouter from './Routes/PlantVeiw/GetPlantViewTable.Route';
+import GetManyDeviceSameKeyChartRouter from './Routes/GetManyDeviceSameKeyChart.Route';
 const cors = require('cors');
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/api/v1/getStatisticsData", StatisticsCardRouter);
 app.use("/api/v1/getLatestValueCardData", LatestValueCardRouter);
 app.use("/api/v1/getEnergyYieldData", GetEnergyYieldRouter);
 app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
+app.use("/api/v1/getManyDeviceSameKeyChartData", GetManyDeviceSameKeyChartRouter)
 // Battery
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);
 app.use("/api/v1/getBESSDailyData", GetBESSDailyRouter);

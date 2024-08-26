@@ -46,7 +46,7 @@ const GetPlantViewTableController = async (req: Request, res: Response): Promise
     // Iterate over each device in the searchTag
     for (const [device, key] of Object.entries(searchTag)) {
       const deviceDetails = await getDeviceDetails(`${device}-`, customerID, token);
-      console.log(deviceDetails);
+      // console.log(deviceDetails);
 
       // Sequentially fetch telemetry data for each device
       for (const [i, deviceInfo] of deviceDetails.entries()) {
@@ -61,8 +61,8 @@ const GetPlantViewTableController = async (req: Request, res: Response): Promise
 
           const value = jp.query(response.data, '$..value') as string[];
 
-          console.log(response.data);
-          console.log(value);
+          // console.log(response.data);
+          // console.log(value);
 
           // Add the key to the column list
           
