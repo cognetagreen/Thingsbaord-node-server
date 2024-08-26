@@ -83,7 +83,7 @@ const GetManyDeviceSameKeyChartController = async (req: Request, res: Response):
 
           series.push({
             type: searchTag.type,
-            name: `${deviceInfo.name} ${searchTag.name}`,
+            name: searchTag.name+deviceInfo.name.split("-")[1],
             data: seriesData,
             marker: { enabled: false }
           });

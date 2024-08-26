@@ -56,6 +56,13 @@ const GetBESSDailyController = async (req: Request, res: Response): Promise<void
                     data : seriesData[i],
                     marker: {
                         enabled: false // Disable the dots on the line
+                    },
+                    shadow: {
+                        color: 'rgba(0, 0, 0, 0.1)', // Shadow color
+                        offsetX: 1, // Horizontal offset of the shadow
+                        offsetY: 1, // Vertical offset of the shadow
+                        opacity: 0.3, // Shadow opacity
+                        blur: 2 // Shadow blur
                     }
                 });
             }
