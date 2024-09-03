@@ -18,6 +18,8 @@ import GetPlantCardRouter from './Routes/PlantVeiw/GetPlantCard.Route';
 import GetPlantViewTableRouter from './Routes/PlantVeiw/GetPlantViewTable.Route';
 import GetManyDeviceSameKeyChartRouter from './Routes/GetManyDeviceSameKeyChart.Route';
 import GetManyDeviceManyKeysRouter from './Routes/GetManyDeviceManyKeys.Route';
+import GetLiveAlarmRouter from './Routes/Alarm/GetLiveAlarm.Route';
+import GetManyDeviceManyKeysLastValueRouter from './Routes/GetManyDeviceManyKeysLastValue.Route';
 const cors = require('cors');
 
 const app = express();
@@ -58,6 +60,7 @@ app.use("/api/v1/getEnergyYieldData", GetEnergyYieldRouter);
 app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
 app.use("/api/v1/getManyDeviceSameKeyChartData", GetManyDeviceSameKeyChartRouter)
 app.use("/api/v1/GetManyDeviceManyKeysChartData", GetManyDeviceManyKeysRouter);
+app.use("/api/v1/GetManyDeviceManyKeysChartData/LastValue", GetManyDeviceManyKeysLastValueRouter);
 // Battery
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);
 app.use("/api/v1/getBESSDailyData", GetBESSDailyRouter);
@@ -72,6 +75,9 @@ app.use("/api/v1/getPlantViewTableData", GetPlantViewTableRouter);
 // Widget Table Routes
 app.use("/api/v1/getGeneratorTableData", GetGeneratorTableRouter);
 
+
+// Alarm
+app.use("/api/v1/getLiveAlarmTableData", GetLiveAlarmRouter);
 
 
 // Start the server

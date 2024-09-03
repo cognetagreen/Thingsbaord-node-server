@@ -1,5 +1,5 @@
 import express from 'express';
-import { GetManyDeviceManyKeysController } from '../Controller/GetManyDeviceManyKeys.Controller';
+import {GetManyDeviceManyKeysController} from '../Controller/GetManyDeviceManyKeys.Controller';
 
 const GetManyDeviceManyKeysRouter = express.Router();
 

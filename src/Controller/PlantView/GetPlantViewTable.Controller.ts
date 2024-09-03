@@ -21,7 +21,7 @@ const getDeviceDetails = async (device: string, customerID : string, Token: stri
   const response = await axios.get(`${BASE_URL}/customer/${customerID}/deviceInfos?pageSize=200&page=0&textSearch=${device}&sortProperty=label&sortOrder=ASC&includeCustomers=true`, {
     headers: { 'X-Authorization': `Bearer ${Token}` }
   });
-//   console.log(response.data)
+  // console.log(response.request)
   const name = jp.query(response.data, '$.data[*].label');
   const id = jp.query(response.data, '$.data[*].id.id');
   const ownerName = jp.query(response.data, '$.data[*].ownerName');
@@ -37,6 +37,7 @@ const getDeviceDetails = async (device: string, customerID : string, Token: stri
 const GetPlantViewTableController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { searchTag, customerID, token } = req.body;
+    // console.log(searchTag);
     // const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
     // console.log(timeWindow);
     let series = [];

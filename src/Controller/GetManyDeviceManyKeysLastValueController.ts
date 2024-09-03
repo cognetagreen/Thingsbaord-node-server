@@ -24,7 +24,8 @@ interface TimeSeries {
   value: string;
 }
 
-const GetManyDeviceManyKeysController = async (req: Request, res: Response): Promise<void> => {
+
+const GetManyDeviceManyKeysLastValueController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { searchTag, timeWindow, token, customerID } = req.body;
     const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
@@ -45,7 +46,7 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
           });
           const telemetryData = response.data;
 
-          console.log(response)
+        //   console.log(response)
 
           if (telemetryData) {
             const keys = elem.keys as string;
@@ -54,7 +55,36 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
 
             for (let i = 0; i < key.length; i++) {
               const values = telemetryData[key[i]] as TimeSeries[];
-              seriesData.push(values.map(value => [value.ts, parseFloat(parseFloat(value.value).toFixed(2))]));
+                // ****** Logic For Last Values of Day ********
+              var data = values.map(function(tsValuePair) {
+                return { x: tsValuePair.ts, y: tsValuePair.value };
+            });
+            var tsArr = data.map(elem => {
+                var date = new Date(elem.x);
+                var dateString = date.toLocaleString().split(",")[0].replace(/\//g, "");
+                return [dateString, elem.x, parseFloat(elem.y)];
+            });
+            // console.log(tsArr)
+            var lastValuesMap = new Map();
+    
+            // Iterate over tsArr
+            tsArr.forEach(subarr => {
+                var dateString = subarr[0];
+                var date = new Date(subarr[1]);
+                date.setSeconds(0,0);
+                date.setMinutes(0);
+                var ts = date.getTime();
+                var value = subarr[2];
+                    // Update the value for the current date string
+                    lastValuesMap.set(dateString, [ts, value]); // Storing [ts, value] as the value
+            });
+    
+            // Extract the last values for each date string
+            data = Array.from(lastValuesMap.values());
+
+            console.log("data : ", data);
+
+              seriesData.push(data);
               series.push({
                 type: elem.type[i],
                 name: elem.name[i],
@@ -95,4 +125,4 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
 };
 
 
-export { GetManyDeviceManyKeysController };
+export { GetManyDeviceManyKeysLastValueController };
