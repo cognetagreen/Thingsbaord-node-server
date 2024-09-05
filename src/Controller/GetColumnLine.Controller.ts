@@ -1,17 +1,23 @@
-import axios from 'axios';
-import { Request, Response } from 'express';
-const jp = require('jsonpath');
+import axios from "axios";
+import { Request, Response } from "express";
+const jp = require("jsonpath");
 
 const BASE_URL = "https://cogneta.cloud/api";
 
-const getDeviceDetails = async (textSearch: string, Token: string): Promise<deviceDetailsType[]> => {
-  const response = await axios.get(`${BASE_URL}/deviceInfos/all?pageSize=20&page=0&textSearch=${textSearch}&sortProperty=createdTime&sortOrder=ASC&includeCustomers=true`, {
-    headers: { 'X-Authorization': `Bearer ${Token}` }
-  });
+const getDeviceDetails = async (
+  textSearch: string,
+  Token: string
+): Promise<deviceDetailsType[]> => {
+  const response = await axios.get(
+    `${BASE_URL}/deviceInfos/all?pageSize=20&page=0&textSearch=${textSearch}&sortProperty=createdTime&sortOrder=ASC&includeCustomers=true`,
+    {
+      headers: { "X-Authorization": `Bearer ${Token}` },
+    }
+  );
 
-  const name = jp.query(response.data, '$.data[*].name');
-  const id = jp.query(response.data, '$.data[*].id.id');
-  const ownerName = jp.query(response.data, '$.data[*].ownerName');
+  const name = jp.query(response.data, "$.data[*].name");
+  const id = jp.query(response.data, "$.data[*].id.id");
+  const ownerName = jp.query(response.data, "$.data[*].ownerName");
   const deviceDetails = name.map((value: any, index: any) => ({
     name: name[index],
     id: id[index],
@@ -22,105 +28,226 @@ const getDeviceDetails = async (textSearch: string, Token: string): Promise<devi
 };
 
 interface deviceDetailsType {
-    name : string;
-    id : string;
-    ownerName : string;
+  name: string;
+  id: string;
+  ownerName: string;
+}
+
+interface TimeSeriesType {
+  ts: number;
+  value: string;
 }
 // interface typeType {
 //     column : string;
 //     line : string;
 // }
-const GetColumnLineController = async (req: Request, res: Response): Promise<void> => {
+const GetColumnLineController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { textSearch, type, token } = req.body;
     const deviceDetails = await getDeviceDetails(textSearch, token);
+    // console.log("deviceDetails : ", deviceDetails);
 
-    let series = [];
+    const columnName = ["Daily Energy", "Energy Consumption"];
+    const lineName = "PR";
+
+    let series = [] as object[];
     const endTs = new Date().getTime();
-    const startTs = endTs - (24*60*60*1000*7); // last 7 days
-    for(var i = 0; i < Object.entries(type).length; i++) {
-        if(i == 0) { // This is for Column!  ((2 Column))
-            const keys = Object.values(type)[i];
-            let columnsData = []; //[[1,2,3,4,5,6,7], [1,2,3,4,5,6,7]]
-            let columnTs = [];
-            for(var j = 0; j < deviceDetails.length; j++) {
-                const id = deviceDetails[j].id;
-                try {
-                  const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${24*60*60*1000}&limit=100&agg=SUM`, {
-                    headers: { 'X-Authorization': `Bearer ${token}` }
-                  });
-                  const value = jp.query(response.data, '$..value'); // [1,2,3,4,5,6,7]
-                  const ts = jp.query(response.data, '$..ts');
-                  // console.log(response.data)
-                  // console.log(value)
-                  columnsData.push((value));
-                  columnTs.push(ts);
-                } catch (error) {
-                  console.error(`Error fetching telemetry data for device ${id}:`, error);
-                } 
-            };
+    const startTs = endTs - 24 * 60 * 60 * 1000 * 7; // last 7 days
+    for (var i = 0; i < Object.entries(type).length; i++) {
+      if (i == 0) {
+        // This is for Column!  ((2 Column))
+        const keys = Object.values(type)[i] as string;
+        const key = keys.split(",");
+        
+        for (const [index, name] of key.entries()) {
+          let columnsData = [] as number[][];
+          let columnTs = [] as number[];
+          for (var j = 0; j < deviceDetails.length; j++) {
+            const id = deviceDetails[j].id;
+            try {
+              const response = await axios.get(
+                `${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${name}&startTs=${startTs}&endTs=${endTs}&limit=10000&agg=NONE`,
+                {
+                  headers: { "X-Authorization": `Bearer ${token}` },
+                }
+              );
 
-            let sum = []
-            for(var k = 0; k < columnsData[0].length; k++) {
-              var title = ["Daily Energy", "Energy Consumption"]
-              var data = {
-                name : title[k],
-                type : "column",
-                data : [(columnTs[0][k+7]||0), (parseFloat(columnsData[0][k])||0) + (parseFloat(columnsData[1][k+7])|| 0)]
+              // console.log(response.data)
+
+              const telemetryData = response.data;
+
+              const values = telemetryData[name] as TimeSeriesType[];
+
+              // ***********Last Day Of Value*********
+              var specificKeyData = values.map(function (tsValuePair) {
+                return { x: tsValuePair.ts, y: tsValuePair.value };
+              });
+              var tsArr = specificKeyData.map((elem) => {
+                var date = new Date(elem.x);
+                var dateString = date
+                  .toLocaleString()
+                  .split(",")[0]
+                  .replace(/\//g, "");
+                return [dateString, elem.x, parseFloat(elem.y)];
+              });
+              // console.log(tsArr)
+              var lastValuesMap = new Map();
+
+              // Iterate over tsArr
+              tsArr.forEach((subarr) => {
+                var dateString = subarr[0];
+                var date = new Date(subarr[1]);
+                date.setSeconds(0, 0);
+                date.setMinutes(0);
+                var ts = date.getTime();
+                var value = subarr[2];
+                // Update the value for the current date string
+                lastValuesMap.set(dateString, { ts: ts, value: value }); // Storing [ts, value] as the value
+              });
+
+              // Extract the last values for each date string
+              specificKeyData = Array.from(lastValuesMap.values());
+
+              // console.log("specificKeyData : ", name, specificKeyData);
+
+              columnTs = jp.query(specificKeyData, "$..ts");
+              const colValue = jp.query(
+                specificKeyData,
+                "$..value"
+              ) as number[];
+              if (columnsData.length > 0) {
+                columnsData = colValue.map((value: number, i: number) =>
+                  value
+                    ? [columnTs[i], columnsData[i][1] + value]
+                    : [columnTs[i], columnsData[i][1] + 0]
+                );
+              } else {
+                columnsData = colValue.map((value: number, i: number) =>
+                  value ? [columnTs[i], value] : [columnTs[i], 0]
+                );
               }
-              sum.push((parseFloat(columnsData[0][k]) + parseFloat(columnsData[1][k+7])).toFixed(2));
-              series.push(data);
+              // console.log("columnsData: ", columnsData);
+
+            } catch (error) {
+              console.error(
+                `Error fetching telemetry data for device ${id}:`,
+                error
+              );
             }
-        } else if(i==1) { // This is For Line
-            const keys = Object.values(type)[i];
-            let lineData = [];
-            let lineTs = [];
-            for(var j = 0; j < deviceDetails.length; j++) {
-              const id = deviceDetails[j].id;
-              try {
-                const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${24*60*60*1000}&limit=100&agg=AVG`, {
-                  headers: { 'X-Authorization': `Bearer ${token}` }
-                });
-                const value = jp.query(response.data, '$..value');
-                const ts = jp.query(response.data, '$..ts');
-                // console.log(response.data)
-                // console.log(value)
-                lineData.push((value));
-                lineTs.push(ts);
-              } catch (error) {
-                console.error(`Error fetching telemetry data for device ${id}:`, error);
-              } 
-            };
-            let sum = [];
-            for(var k = 0; k < lineData[0].length; k++) {
-              sum.push(((parseFloat(lineData[0][k]) || 0) + parseFloat(lineData[1][k+7]) || 0).toFixed(2));
-            }
-            // console.log(sum);
-            var plotLine = []
-            for(var k = 0; k < lineData[0].length; k++) {
-              const PV_PR = (parseFloat(sum[0+7])*100)/(parseFloat(sum[1+7])*parseFloat(sum[2+7])) || 0;
-              const Wind_PR = parseFloat(sum[3+7])/(parseFloat(sum[4+7])*24*0.2) || 0;
-              const BESS_PR = (parseFloat(sum[5+7])/parseFloat(sum[6+7]))*100 || 0;
-              plotLine.push([(lineTs[0][k+7] || 0), (PV_PR+Wind_PR+BESS_PR)])
-            }
-            var pata = {
-              name : "PR Value of Total Portfolio",
-              type : "spline",
-              data : plotLine
-            };
-            series.push(pata);
           }
+          series.push({
+            name: columnName[index],
+            type: "column",
+            data: columnsData,
+          });
+        };
+      } else if(i==1) { // This is For Line
+          const keys = Object.values(type)[i] as string;
+          let lineData = [] as number[][];
+          let lineTs = [] as number[];
+          for(var j = 0; j < deviceDetails.length; j++) {
+            const id = deviceDetails[j].id;
+            try {
+              const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${keys}&startTs=${startTs}&endTs=${endTs}&limit=10000&agg=NONE`, {
+                headers: { 'X-Authorization': `Bearer ${token}` }
+              });
 
-          // console.log(series);
-      }
+              const telemetryData = response.data;
+              const key = keys.split(",");
+              
+              for(const name of key) {
+                const values = telemetryData[name] as TimeSeriesType[];
+                // ***********Last Day Of Value*********
+                var specificKeyData = values.map(function (tsValuePair) {
+                  return { x: tsValuePair.ts, y: tsValuePair.value };
+                });
+                var tsArr = specificKeyData.map((elem) => {
+                  var date = new Date(elem.x);
+                  var dateString = date
+                  .toLocaleString()
+                  .split(",")[0]
+                  .replace(/\//g, "");
+                  return [dateString, elem.x, parseFloat(elem.y)];
+                });
+                // console.log(tsArr)
+                var lastValuesMap = new Map();
+                
+                // Iterate over tsArr
+                tsArr.forEach((subarr) => {
+                  var dateString = subarr[0];
+                  var date = new Date(subarr[1]);
+                  date.setSeconds(0, 0);
+                  date.setMinutes(0);
+                  var ts = date.getTime();
+                  var value = subarr[2];
+                  // Update the value for the current date string
+                  lastValuesMap.set(dateString, { ts: ts, value: value }); // Storing [ts, value] as the value
+                });
+                
+                // Extract the last values for each date string
+                specificKeyData = Array.from(lastValuesMap.values());
+                // console.log(name ,specificKeyData)
+                
+                lineTs = jp.query(specificKeyData, "$..ts");
+                const lineValue = jp.query(specificKeyData, "$..value");
+                
+                lineData.push(lineValue);
+                
+              }
+              // console.log("lineData: ", lineData);
+              
+              let allPlantSumLineValue = [] as number[][];
+              for(var j = 0; j < key.length; j++) {
+                var temp = [] as number[];
+                for(var k=0; k < lineData[j].length; k++) {
+                  temp.push(
+                    lineData[j][k] + lineData[j+key.length][k] //Summation Values by Plant
+                  );
+                }
+                allPlantSumLineValue.push(temp);
+              }
+              
+              // console.log("allPlantSumValue : ", allPlantSumLineValue);
 
+              let splineData = [] as number[][];
+              for(var z = 0; z < allPlantSumLineValue[0].length; z++) {
+
+                var pv = ((allPlantSumLineValue[0][z]*100)/(allPlantSumLineValue[1][z]*allPlantSumLineValue[2][z]));
+                var wind = allPlantSumLineValue[3][z]/(allPlantSumLineValue[4][z] * 24 * 0.2);
+                var bess = (allPlantSumLineValue[5][z]/allPlantSumLineValue[6][z]) * 100;
+
+                splineData.push(
+                  [lineTs[z], (pv+wind+bess)/deviceDetails.length]
+                )
+              }
+              series.push(
+                {
+                  name : lineName,
+                  type : "spline",
+                  data : splineData
+                }
+              )
+
+            } catch (error) {
+              console.error(
+                `Error fetching telemetry data for device ${id}:`,
+                error
+              );
+            }
+          }
+        }
+
+    }
 
     // Filter out any null results (devices that failed to fetch or had no data)
     const filteredSeries = series.filter((s) => s !== null);
 
     if (filteredSeries.length > 0) {
-      // console.log(filteredSeries)
-      res.status(200).json(filteredSeries);
+    // console.log(filteredSeries)
+    res.status(200).json(filteredSeries);
     } else {
       res.status(404).json({ error: "No telemetry data found" });
     }

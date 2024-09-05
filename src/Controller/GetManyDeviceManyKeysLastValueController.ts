@@ -38,7 +38,7 @@ const GetManyDeviceManyKeysLastValueController = async (req: Request, res: Respo
     await Promise.all(
       searchElements.map(async (elem) => {
         const deviceID = await getDeviceID(elem.devName, token, customerID);
-        console.log(deviceID)
+        // console.log(deviceID)
 
         try {
           const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${elem.keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${interval}&limit=5000&agg=${aggregate}&orderBy=ASC&useStrictDataTypes=false`, {
@@ -82,7 +82,7 @@ const GetManyDeviceManyKeysLastValueController = async (req: Request, res: Respo
             // Extract the last values for each date string
             data = Array.from(lastValuesMap.values());
 
-            console.log("data : ", data);
+            // console.log("data : ", data);
 
               seriesData.push(data);
               series.push({

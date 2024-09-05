@@ -20,6 +20,7 @@ import GetManyDeviceSameKeyChartRouter from './Routes/GetManyDeviceSameKeyChart.
 import GetManyDeviceManyKeysRouter from './Routes/GetManyDeviceManyKeys.Route';
 import GetLiveAlarmRouter from './Routes/Alarm/GetLiveAlarm.Route';
 import GetManyDeviceManyKeysLastValueRouter from './Routes/GetManyDeviceManyKeysLastValue.Route';
+import GetPlantTableRouter from './Routes/GetPlantTable.Route';
 const cors = require('cors');
 
 const app = express();
@@ -61,6 +62,8 @@ app.use("/api/v1/getAssetSummaryData", GetAssetSummaryRouter);
 app.use("/api/v1/getManyDeviceSameKeyChartData", GetManyDeviceSameKeyChartRouter)
 app.use("/api/v1/GetManyDeviceManyKeysChartData", GetManyDeviceManyKeysRouter);
 app.use("/api/v1/GetManyDeviceManyKeysChartData/LastValue", GetManyDeviceManyKeysLastValueRouter);
+app.use("/api/v1/getPlantTableData", GetPlantTableRouter)
+
 // Battery
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);
 app.use("/api/v1/getBESSDailyData", GetBESSDailyRouter);

@@ -29,7 +29,7 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
     const { searchTag, timeWindow, token, customerID } = req.body;
     const { startTs, endTs, aggregate, interval } = timeWindow as TimeWindowType;
     const searchElements = searchTag as any[];
-    console.log(searchTag, timeWindow);
+    // console.log(searchTag, timeWindow);
     let series = [] as any[];
     let errors = [] as any[];
 
@@ -37,7 +37,7 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
     await Promise.all(
       searchElements.map(async (elem) => {
         const deviceID = await getDeviceID(elem.devName, token, customerID);
-        console.log(deviceID)
+        // console.log(deviceID)
 
         try {
           const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${elem.keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${interval}&limit=5000&agg=${aggregate}&orderBy=ASC&useStrictDataTypes=false`, {
@@ -45,7 +45,7 @@ const GetManyDeviceManyKeysController = async (req: Request, res: Response): Pro
           });
           const telemetryData = response.data;
 
-          console.log(response)
+          // console.log(response)
 
           if (telemetryData) {
             const keys = elem.keys as string;

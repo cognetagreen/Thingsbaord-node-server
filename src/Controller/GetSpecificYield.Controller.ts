@@ -11,10 +11,12 @@ const getDeviceDetails = async (textSearch: string, Token: string): Promise<devi
 
   const name = jp.query(response.data, '$.data[*].name');
   const id = jp.query(response.data, '$.data[*].id.id');
+  const description = jp.query(response.data, "$.data[*].additionalInfo.description");
   const ownerName = jp.query(response.data, '$.data[*].ownerName');
   const deviceDetails = name.map((value: any, index: any) => ({
     name: name[index],
     id: id[index],
+    description : description,
     ownerName: ownerName[index],
   }));
 
@@ -24,6 +26,7 @@ const getDeviceDetails = async (textSearch: string, Token: string): Promise<devi
 interface deviceDetailsType {
     name : string;
     id : string;
+    description : string[];
     ownerName : string;
 }
 
@@ -34,8 +37,10 @@ const GetSpecificYieldController = async (req: Request, res: Response): Promise<
     // console.log(deviceDetails);
 
     const series = await Promise.all(
-      deviceDetails.map(async (device) => {
+      deviceDetails.map(async (device, i) => {
         const id = device.id;
+        const jsonString = device.description;
+        const Description = jsonString.map(jsonStr => JSON.parse(jsonStr));
         const ownerName = device.ownerName as String;
 
         try {
@@ -46,11 +51,12 @@ const GetSpecificYieldController = async (req: Request, res: Response): Promise<
           const telemetryData = response.data[key];
 
           if (telemetryData && telemetryData.length > 0) {
+            const DC = Description[i].Plant_DC_Capacity as number;
             const x = Number(telemetryData[0].ts);
             const y = Number(telemetryData[0].value).toFixed(2);
             return {
               name: ownerName,
-              data: [[x, parseFloat(y)]],
+              data: [[x, parseFloat((parseFloat(y)/DC).toFixed(2)) || 0]],
             };
           }
         } catch (error) {
