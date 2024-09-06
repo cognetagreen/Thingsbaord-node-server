@@ -53,14 +53,14 @@ const getDeviceDetails = async (device: string, customerID : string, Token: stri
 const GetPlantTableController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { searchTag, textSearch, token } = req.body;
-    console.log("searchTag : ",searchTag);
+    // console.log("searchTag : ",searchTag);
 
     let series = [];
     let column = [] as string[];
     let nonFormatDataFromAPI = [] as string[][];
     
     const customerDetails = await getCustomersDetails(textSearch, token);
-    console.log("customerDetails : ", customerDetails);
+    // console.log("customerDetails : ", customerDetails);
     for(const [index, info] of Object.entries(customerDetails)) {
 
       // if(index !== "0") {
@@ -77,14 +77,14 @@ const GetPlantTableController = async (req: Request, res: Response): Promise<voi
       
       column.push("plantName", "type", "Object.entries(capacity).keys", "EnergySystem", "Country")
 
-        console.log("parseInfo : ", id, plantName, type, Object.keys(capacity), EnergySystem, country);
+        // console.log("parseInfo : ", id, plantName, type, Object.keys(capacity), EnergySystem, country);
 
         let nonRowFormatDataFromAPI = [plantName, type, EnergySystem, Object.values(capacity), country] as string[][];
         
         // Iterate over each device in the searchTag
         for (const [device, key] of Object.entries(searchTag)) {
           const deviceDetails = await getDeviceDetails(`${device}`, id, token);
-          console.log("deviceDetails : ", deviceDetails);
+          // console.log("deviceDetails : ", deviceDetails);
     
           // Sequentially fetch telemetry data for each device
           for (const [i, deviceInfo] of deviceDetails.entries()) {
@@ -93,14 +93,27 @@ const GetPlantTableController = async (req: Request, res: Response): Promise<voi
             const newKey = stringKey.replace(/0/g, (deviceInfo.name).split("-")[1]); // DG-2 => ["DG", 2]
     
             try {
-              const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${newKey}&useStrictDataTypes=true`, {
+              const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${newKey}`, {
                 headers: { 'X-Authorization': `Bearer ${token}` }
               });
     
               const value = jp.query(response.data, '$..value') as string[];
-    
+              const ts = jp.query(response.data, '$..ts') as number[];
+
+
               // console.log(response.data);
               // console.log(value);
+
+
+              const currentTime = new Date().getTime();
+              const prevTime = currentTime - 1000*60*11
+              const values = ts.map((elem : number, i) => {
+                if(elem>prevTime && elem<=currentTime) {
+                  return value[i];
+                } else {
+                  return "-1";
+                }
+              })
     
               // Add the key to the column list
               
@@ -111,7 +124,7 @@ const GetPlantTableController = async (req: Request, res: Response): Promise<voi
                 // console.log("ts", [ts]);
                 // nonFormatDataFromAPI.push(ts.map(elem => new Date(elem).toLocaleString())); // DATE & TIME
             // }
-            nonRowFormatDataFromAPI.push( value ); // NAME OF DEVICES/PLANTS AND 1 Key
+            nonRowFormatDataFromAPI.push( values ); // NAME OF DEVICES/PLANTS AND 1 Key
             //   nonFormatDataFromAPI.push(value.map(elem => parseFloat(elem).toFixed(2)));
             } catch (error) {
               console.error(`Error fetching telemetry data for device ${id}:`, error);
