@@ -22,12 +22,13 @@ import GetLiveAlarmRouter from './Routes/Alarm/GetLiveAlarm.Route';
 import GetManyDeviceManyKeysLastValueRouter from './Routes/GetManyDeviceManyKeysLastValue.Route';
 import GetPlantTableRouter from './Routes/GetPlantTable.Route';
 import GetPlantTableSummaryData from './Routes/GetPlantTableSummary.Route';
+import GetCandleStickChartDataRouter from './Routes/GetCandleStickChartData.Route';
 const cors = require('cors');
 
 const app = express();
 
 
-const port = process.env.PORT || 6921;
+const port = process.env.PORT || 6922;
 
 // Middleware
 app.use(express.json());
@@ -65,6 +66,7 @@ app.use("/api/v1/GetManyDeviceManyKeysChartData", GetManyDeviceManyKeysRouter);
 app.use("/api/v1/GetManyDeviceManyKeysChartData/LastValue", GetManyDeviceManyKeysLastValueRouter);
 app.use("/api/v1/getPlantTableData", GetPlantTableRouter);
 app.use("/api/v1/getPlantTableSummaryData", GetPlantTableSummaryData);
+app.use("/api/v1/GetCandleStickChartData",GetCandleStickChartDataRouter);
 
 // Battery
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);
