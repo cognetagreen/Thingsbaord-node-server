@@ -77,7 +77,7 @@ const GetBatteryStatusController = async (req: Request, res: Response): Promise<
         const percentageAbove30 = values.filter((value) => parseFloat(value) > 30).length / values.length * 100;
         res.status(200).json(percentageAbove30.toFixed(2));
       } else {
-        const parsedValues = values.map(value => parseFloat(parseFloat(value).toFixed(2)));
+        const parsedValues = values;
         res.status(200).json(parsedValues);
       }
     } else {

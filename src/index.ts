@@ -23,6 +23,7 @@ import GetManyDeviceManyKeysLastValueRouter from './Routes/GetManyDeviceManyKeys
 import GetPlantTableRouter from './Routes/GetPlantTable.Route';
 import GetPlantTableSummaryData from './Routes/GetPlantTableSummary.Route';
 import GetCandleStickChartDataRouter from './Routes/GetCandleStickChartData.Route';
+import GetLocationMapDataRouter from './Routes/GetLocationMapData.Route';
 const cors = require('cors');
 
 const app = express();
@@ -67,6 +68,7 @@ app.use("/api/v1/GetManyDeviceManyKeysChartData/LastValue", GetManyDeviceManyKey
 app.use("/api/v1/getPlantTableData", GetPlantTableRouter);
 app.use("/api/v1/getPlantTableSummaryData", GetPlantTableSummaryData);
 app.use("/api/v1/GetCandleStickChartData",GetCandleStickChartDataRouter);
+app.use("/api/v1/getLocationMapData", GetLocationMapDataRouter)
 
 // Battery
 app.use("/api/v1/getBatteryStatusData", GetBatteryStatusRouter);

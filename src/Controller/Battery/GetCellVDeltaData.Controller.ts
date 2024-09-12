@@ -27,7 +27,7 @@ const GetCellVDeltaController = async (req: Request, res: Response): Promise<voi
       const deviceID = await getDeviceID(searchTag.devName, token, customerID);
       const now = new Date();
       const startTs = new Date(now.getTime() - 24 * 60 * 60 * 1000).setHours(0,0,0,0)
-      const endTs = startTs + 24     * 60 * 60 * 1000 - 1;
+      const endTs = startTs + 24 * 60 * 60 * 1000 - 1;
     //   console.log("deviceID : ", deviceID)
       try {
         const response = await axios.get(`${BASE_URL}/plugins/telemetry/DEVICE/${deviceID}/values/timeseries?keys=${searchTag.keys}&startTs=${startTs}&endTs=${endTs}&intervalType=MILLISECONDS&interval=${1000*60*5}&limit=5000&agg=NONE&orderBy=ASC&useStrictDataTypes=false`, {
@@ -54,6 +54,7 @@ const GetCellVDeltaController = async (req: Request, res: Response): Promise<voi
                     type : searchTag.type[0],
                     name : searchTag.name[0],
                     data : Object.values(countArray),//[11,22,33,44,55,66,77,88,99]
+                    color : searchTag.color
                 });
             // }
 
